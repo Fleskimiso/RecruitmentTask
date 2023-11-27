@@ -1,8 +1,10 @@
 import os
 import json
 import csv
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 from datetime import datetime
+
+from code.models.user import User
 
 
 class UsersDataProcessor:
@@ -23,17 +25,33 @@ class UsersDataProcessor:
     @staticmethod
     def validate_telephone_number(telephone):
         # Remove special characters and leading zeros
-        cleaned_telephone = ''.join(filter(str.isdigit, telephone)).lstrip('0')
+        cleaned_telephone = ''.join(filter(str.isdigit, telephone.strip('+() ')))
         # Store telephone numbers as 9 digits
-        if len(cleaned_telephone) == 9:
-            return cleaned_telephone
-        return None
+        if cleaned_telephone != '':
+            return cleaned_telephone[-9:]
+        return False
 
     def read_json_file(self, file_path):
         try:
             with open(file_path, 'r') as file:
                 data = json.load(file)
-            return data
+
+                processed_data = []
+                for item in data:
+                    # Process children data in the JSON item
+                    children_list = item.get('children', [])
+
+                    children = []
+                    for child in children_list:
+                        name = child.get('name', '')
+                        age = int(child.get('age', 0))
+                        children.append({'name': name, 'age': age})
+
+                    # Update the item data with processed children information
+                    item['children'] = children
+                    processed_data.append(item)
+
+                return processed_data
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Error reading JSON file {file_path}: {e}")
             return None
@@ -42,8 +60,25 @@ class UsersDataProcessor:
         try:
             with open(file_path, 'r') as file:
                 reader = csv.DictReader(file, delimiter=';')
-                data = [row for row in reader]
-            return data
+                data = []
+
+                for row in reader:
+                    # Process children data in the CSV row
+                    children_string = row.get('children', '')
+                    children_list = [child.strip() for child in children_string.split(',')]
+
+                    children = []
+                    for child in children_list:
+                        if len(child) > 1:
+                            name, age = child.split(' ')
+                            age = int(age.strip(')').strip('('))
+                            children.append({'name': name.strip(), 'age': age})
+
+                    # Update the row data with processed children information
+                    row['children'] = children
+                    data.append(row)
+
+                return data
         except FileNotFoundError as e:
             print(f"Error reading CSV file {file_path}: {e}")
             return None
@@ -51,7 +86,7 @@ class UsersDataProcessor:
     def read_xml_file(self, file_path):
         try:
             all_users = []
-            tree = ET.parse(file_path)
+            tree = ElementTree.parse(file_path)
             root = tree.getroot()
 
             for user in root.findall('user'):
@@ -69,9 +104,10 @@ class UsersDataProcessor:
                         } for child in user.findall('children/child')
                     ]
                 }
-                return all_users.append(user_data)
+                all_users.append(user_data)
+                return all_users
 
-        except (FileNotFoundError, ET.ParseError) as e:
+        except (FileNotFoundError, ElementTree.ParseError) as e:
             print(f"Error reading XML file {file_path}: {e}")
 
     def process_data(self):
@@ -97,12 +133,11 @@ class UsersDataProcessor:
 
         for user in all_users:
             if 'email' in user and 'telephone_number' in user:
-                if self.validate_email(user['email']) and user['telephone_number'].strip():
+                if self.validate_email(user['email']) and self.validate_telephone_number(user['telephone_number']):
                     user['telephone_number'] = self.validate_telephone_number(user['telephone_number'])
                     if user['telephone_number']:
                         user['created_at'] = datetime.strptime(user['created_at'], '%Y-%m-%d %H:%M:%S')
-                        key = user['email'] + user['telephone_number']
-                        existing_user = next((x for x in self.users if x['email'] + x['telephone_number'] == key), None)
+                        existing_user = next((x for x in self.users if x['email'] == user['email'] or x['telephone_number'] == user['telephone_number']), None)
                         if existing_user:
                             if existing_user['created_at'] < user['created_at']:
                                 self.users.remove(existing_user)
@@ -110,4 +145,15 @@ class UsersDataProcessor:
                         else:
                             self.users.append(user)
 
+        for i in range(0, len(self.users)):
+            user = User(
+                self.users[i]['firstname'],
+                self.users[i]['telephone_number'],
+                self.users[i]['email'],
+                self.users[i]['password'],
+                self.users[i]['role'],
+                self.users[i]['created_at'],
+                self.users[i]['children']
+            )
+            self.users[i] = user
         return self.users
