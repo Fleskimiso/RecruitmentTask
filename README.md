@@ -7,7 +7,9 @@ All The dataset required for this script  is located at /data subfolder.
 ### Requirements 
 
 - Python 3.10 or higher
-- Third-party libraries ( yet none )
+- Third-party libraries: 
+    - sqlite3
+    - argparse
 ## Usage
 Run the script from the shell (project directory as a working directory). 
 
@@ -39,7 +41,7 @@ Here are the example of commands to execute different actions.
 ## To do
 - tests
 - comments and code refactor
-- sqllite database integration 
+- sqlite3 database integration (done)
 
 ## Contact Information
 Dawid Pawłowicz \

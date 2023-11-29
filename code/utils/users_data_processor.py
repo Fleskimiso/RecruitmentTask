@@ -10,7 +10,6 @@ from code.models.user import User
 class UsersDataProcessor:
     def __init__(self, data_catalog):
         self.data_catalog = data_catalog
-        self.users = []
 
     @staticmethod
     def validate_email(email):
@@ -112,6 +111,7 @@ class UsersDataProcessor:
 
     def process_data(self):
         all_users = []
+        users = []
 
         for root, dirs, files in os.walk(self.data_catalog):
             for file in files:
@@ -137,23 +137,23 @@ class UsersDataProcessor:
                     user['telephone_number'] = self.validate_telephone_number(user['telephone_number'])
                     if user['telephone_number']:
                         user['created_at'] = datetime.strptime(user['created_at'], '%Y-%m-%d %H:%M:%S')
-                        existing_user = next((x for x in self.users if x['email'] == user['email'] or x['telephone_number'] == user['telephone_number']), None)
+                        existing_user = next((x for x in users if x['email'] == user['email'] or x['telephone_number'] == user['telephone_number']), None)
                         if existing_user:
                             if existing_user['created_at'] < user['created_at']:
-                                self.users.remove(existing_user)
-                                self.users.append(user)
+                                users.remove(existing_user)
+                                users.append(user)
                         else:
-                            self.users.append(user)
+                            users.append(user)
 
-        for i in range(0, len(self.users)):
+        for i in range(0, len(users)):
             user = User(
-                self.users[i]['firstname'],
-                self.users[i]['telephone_number'],
-                self.users[i]['email'],
-                self.users[i]['password'],
-                self.users[i]['role'],
-                self.users[i]['created_at'],
-                self.users[i]['children']
+                users[i]['firstname'],
+                users[i]['telephone_number'],
+                users[i]['email'],
+                users[i]['password'],
+                users[i]['role'],
+                users[i]['created_at'],
+                users[i]['children']
             )
-            self.users[i] = user
-        return self.users
+            users[i] = user
+        return users
