@@ -1,6 +1,6 @@
 import argparse
 
-from code.utils.task_runnner import TaskRunner
+from src.utils.task_runnner import TaskRunner
 
 if __name__ == "__main__":
     path = './data'  # path to our data files

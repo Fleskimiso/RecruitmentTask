@@ -1,7 +1,7 @@
-from code.models.user import User
-from code.providers.data_provider import DataProvider
-from code.utils.auth import authenticate
-from code.providers.sqldb_data_provider import SQLiteDBDataProvider
+from src.models.user import User
+from src.providers.data_provider import DataProvider
+from src.utils.auth import authenticate
+from src.providers.sqldb_data_provider import SQLiteDBDataProvider
 
 
 class TaskRunner:

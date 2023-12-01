@@ -4,7 +4,8 @@ import csv
 import xml.etree.ElementTree as ElementTree
 from datetime import datetime
 
-from code.models.user import User
+from src.models.user import User
+from src.utils.validator import Validator
 
 
 class UsersDataProcessor:
@@ -12,25 +13,7 @@ class UsersDataProcessor:
         self.data_catalog = data_catalog
 
     @staticmethod
-    def validate_email(email):
-        if email.count('@') == 1:
-            parts = email.split('@')
-            if len(parts[0]) >= 1 and '.' in parts[1]:
-                domain_parts = parts[1].split('.')
-                if 1 <= len(domain_parts[-1]) <= 4 and domain_parts[-1].isalnum():
-                    return True
-        return False
-
-    @staticmethod
-    def validate_telephone_number(telephone):
-        # Remove special characters and leading zeros
-        cleaned_telephone = ''.join(filter(str.isdigit, telephone.strip('+() ')))
-        # Store telephone numbers as 9 digits
-        if cleaned_telephone != '':
-            return cleaned_telephone[-9:]
-        return False
-
-    def read_json_file(self, file_path):
+    def read_json_file(file_path):
         try:
             with open(file_path, 'r') as file:
                 data = json.load(file)
@@ -55,7 +38,8 @@ class UsersDataProcessor:
             print(f"Error reading JSON file {file_path}: {e}")
             return None
 
-    def read_csv_file(self, file_path):
+    @staticmethod
+    def read_csv_file(file_path):
         try:
             with open(file_path, 'r') as file:
                 reader = csv.DictReader(file, delimiter=';')
@@ -82,7 +66,8 @@ class UsersDataProcessor:
             print(f"Error reading CSV file {file_path}: {e}")
             return None
 
-    def read_xml_file(self, file_path):
+    @staticmethod
+    def read_xml_file(file_path):
         try:
             all_users = []
             tree = ElementTree.parse(file_path)
@@ -133,8 +118,8 @@ class UsersDataProcessor:
 
         for user in all_users:
             if 'email' in user and 'telephone_number' in user:
-                if self.validate_email(user['email']) and self.validate_telephone_number(user['telephone_number']):
-                    user['telephone_number'] = self.validate_telephone_number(user['telephone_number'])
+                if Validator.validate_email(user['email']) and Validator.validate_telephone_number(user['telephone_number']):
+                    user['telephone_number'] = Validator.validate_telephone_number(user['telephone_number'])
                     if user['telephone_number']:
                         user['created_at'] = datetime.strptime(user['created_at'], '%Y-%m-%d %H:%M:%S')
                         existing_user = next((x for x in users if x['email'] == user['email'] or x['telephone_number'] == user['telephone_number']), None)

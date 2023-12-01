@@ -1,8 +1,8 @@
 import sqlite3
 from pathlib import Path
 
-from code.models.user import User
-from code.providers.data_provider import DataProvider
+from src.models.user import User
+from src.providers.data_provider import DataProvider
 
 
 class SQLiteDBDataProvider(DataProvider):

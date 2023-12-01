@@ -1,4 +1,4 @@
-from code.utils.users_data_processor import UsersDataProcessor
+from src.utils.users_data_processor import UsersDataProcessor
 
 
 class DataProvider:
