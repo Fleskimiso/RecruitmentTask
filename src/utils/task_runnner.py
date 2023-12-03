@@ -1,3 +1,4 @@
+from src.Consts import DB_PATH
 from src.models.user import User
 from src.providers.data_provider import DataProvider
 from src.utils.auth import authenticate
@@ -12,7 +13,7 @@ class TaskRunner:
     def __init__(self, is_using_database, path):
 
         if is_using_database:
-            self.data_provider = SQLiteDBDataProvider(path)
+            self.data_provider = SQLiteDBDataProvider(path, DB_PATH)
         else:  # in case you do not want to use db
             self.data_provider = DataProvider(path)
 
@@ -39,7 +40,7 @@ class TaskRunner:
         elif command == 'print-children':
             self.print_children(user)
         elif command == 'find-similar-children-by-age':
-            self.print_similiar_children_by_age(user, self.data_provider.get_all_users())
+            self.print_similar_children_by_age(user, self.data_provider.get_all_users())
         self.data_provider.close()
 
     def print_all_accounts(self, all_users):
@@ -74,14 +75,13 @@ class TaskRunner:
         for child in children:
             print(f"{child['name']}, {child['age']}")
 
-    def print_similiar_children_by_age(self, user, all_users):
+    def print_similar_children_by_age(self, user, all_users):
         users_with_similar_children = {}  # Dictionary to store users with similar children
 
         children = user.children
 
         # Iterate through the user's children
         for child in children:
-            child_name = child['name']
             child_age = child['age']
 
             # Find users with children of the same age as at least one of the user's children
@@ -91,7 +91,7 @@ class TaskRunner:
                         if other_child['age'] == child_age:
                             if other_user not in users_with_similar_children:
                                 users_with_similar_children[other_user] = []
-                            users_with_similar_children[other_user].append((child_name, child_age))
+                            users_with_similar_children[other_user].append((other_child['name'], other_child['age']))
                             break
 
         # Print the users with similar children and their corresponding children data

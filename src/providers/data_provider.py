@@ -3,7 +3,7 @@ from src.utils.users_data_processor import UsersDataProcessor
 
 class DataProvider:
 
-    all_users = [] # will stay empty if using  sql lite db
+    all_users = []  # will stay empty if using  sql lite db
 
     def __init__(self, path):
         self.users_data_processor = UsersDataProcessor(path)

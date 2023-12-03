@@ -7,15 +7,13 @@ from src.providers.data_provider import DataProvider
 
 class SQLiteDBDataProvider(DataProvider):
 
-    DB_PATH = 'databases/main_database.db'
-
-    def __init__(self, path):
-        super().__init__(path)
-        if Path(self.DB_PATH).exists():  # if it exists there is no need to create db and load data
-            self.database_connection = sqlite3.connect(self.DB_PATH)
+    def __init__(self, data_path, db_path):
+        super().__init__(data_path)
+        if Path(db_path).exists():  # if it exists there is no need to create db and load data
+            self.database_connection = sqlite3.connect(db_path)
             self.cursor = self.database_connection.cursor()
         else:
-            self.database_connection = sqlite3.connect(self.DB_PATH)
+            self.database_connection = sqlite3.connect(db_path)
             self.cursor = self.database_connection.cursor()
             self.create_database_and_load_data()
 
@@ -23,7 +21,7 @@ class SQLiteDBDataProvider(DataProvider):
         self.create_tables()
         self.insert_users(super().get_all_users())  # get data from DataProvider
 
-    def clear_db(self):  # no need for this function for now
+    def clear_db(self):
         self.cursor.execute("DROP TABLE IF EXISTS children")
         self.cursor.execute("DROP TABLE IF EXISTS users")
         self.database_connection.commit()

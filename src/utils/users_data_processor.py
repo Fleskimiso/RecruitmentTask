@@ -89,7 +89,7 @@ class UsersDataProcessor:
                     ]
                 }
                 all_users.append(user_data)
-                return all_users
+            return all_users
 
         except (FileNotFoundError, ElementTree.ParseError) as e:
             print(f"Error reading XML file {file_path}: {e}")

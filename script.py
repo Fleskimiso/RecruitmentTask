@@ -4,6 +4,7 @@ from src.utils.task_runnner import TaskRunner
 
 if __name__ == "__main__":
     path = './data'  # path to our data files
+    # could be moved as the argument for the script
 
     actions = ['print-all-accounts', 'print-oldest-account', 'group-by-age', 'print-children',
                'find-similar-children-by-age', 'create_database']  # all possible actions
